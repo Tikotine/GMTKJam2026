@@ -13,8 +13,11 @@ public class QTECotnroller : MonoBehaviour
     }
 
     [Header("QTE Timing")]
+    public float earlyMissWindow;
+    public float earlySuccessWindow;
     public float perfectWindow;
-    public float successWindow;
+    public float lateSuccessWindow;
+    public float lateMissWindow;
 
     public event Action OnQTEFinished;
 
@@ -66,49 +69,65 @@ public class QTECotnroller : MonoBehaviour
         qteActive = true;
         inputReceived = false;
 
-        //Perfect Window
-        float perfectTimer = perfectWindow;
-
-        while (perfectTimer > 0) 
+        //Early Miss
+        yield return WaitForWindow(earlyMissWindow, QTEResult.MISS);
+        if (!qteActive)
         {
-            if (inputReceived)
-            { 
-                qteResult = QTEResult.PERFECT;
-                FinishQTE();
-
-                yield break;
-            }
-
-            perfectTimer -= Time.deltaTime;
-
-            yield return null;
+            yield break;
         }
 
-
-        //Success Window
-        float successTimer = successWindow;
-        inputReceived = false;
-
-        while (successTimer > 0)
+        //Early Success
+        yield return WaitForWindow(earlySuccessWindow, QTEResult.SUCCESS);
+        if (!qteActive)
         {
-            if (inputReceived)
-            {
-                qteResult = QTEResult.SUCCESS;
-                FinishQTE();
-
-                yield break;
-            }
-
-            successTimer -= Time.deltaTime;
-
-            yield return null;
+            yield break;
         }
 
-        //Miss
+        //Perfect
+        yield return WaitForWindow(perfectWindow, QTEResult.PERFECT);
+        if (!qteActive)
+        {
+            yield break;
+        }
 
+        //Late Success
+        yield return WaitForWindow(lateSuccessWindow, QTEResult.SUCCESS);
+        if (!qteActive)
+        {
+            yield break;
+        }
+
+        //Late Miss
+        yield return WaitForWindow(lateMissWindow, QTEResult.MISS);
+        if (!qteActive)
+        {
+            yield break;
+        }
+
+        //No Input
         qteResult = QTEResult.MISS;
 
         FinishQTE();
+    }
+
+    private IEnumerator WaitForWindow(float duration, QTEResult result)
+    {
+        float timer = duration;
+
+        while (timer > 0) 
+        {
+            if (inputReceived)
+            {
+                qteResult = result;
+                FinishQTE();
+
+                yield break;
+            }
+
+            timer -= Time.deltaTime;
+
+            yield return null;
+        }
     }
 
     public void StartQTE()

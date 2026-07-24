@@ -44,6 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0be1f5a1dcaef694ea242d97fe399ac3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::QTECotnroller
-  perfectWindow: 0.2
-  successWindow: 1
+  earlyMissWindow: 1
+  earlySuccessWindow: 1
+  perfectWindow: 1
+  lateSuccessWindow: 1
+  lateMissWindow: 1
   qteResult: 0
