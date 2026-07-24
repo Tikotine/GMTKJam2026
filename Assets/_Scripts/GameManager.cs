@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -6,13 +7,18 @@ public class GameManager : MonoBehaviour
     public Player playerScript;
     public Enemy enemyScript;
 
-    
+    [Header("Coin Toss")]
+    [SerializeField] private int coin;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
         playerScript = FindAnyObjectByType<Player>();
         enemyScript = FindAnyObjectByType<Enemy>();       
+    }
+    private void Start()
+    {
+        
     }
 
     // Update is called once per frame
@@ -25,6 +31,23 @@ public class GameManager : MonoBehaviour
     //roll heads or tails
     //Assign turn order accordingly
 
+    private void CoinToss()
+    {
+        coin = Random.Range(0, 2);
 
+        if (coin == 0)
+        { 
+            //Player starts first
+            playerScript.attackingState = true;
+            enemyScript.attackingState = false;
+        }
+
+        if (coin == 1) 
+        {
+            //Enemy Starts First
+            playerScript.attackingState = false;
+            enemyScript.attackingState = true;
+        }
+    }
 
 }

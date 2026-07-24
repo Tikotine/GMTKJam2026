@@ -2,6 +2,13 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    [Header("Enemy Status")]
+    public int health;
+    [SerializeField] private float parryCooldown;
+
+    [Header("State")]
+    public bool attackingState;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {

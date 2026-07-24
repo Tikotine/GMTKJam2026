@@ -7,7 +7,7 @@
             "id": "726aa25f-0277-4483-abba-2c566f06ac17",
             "actions": [
                 {
-                    "name": "Parry",
+                    "name": "Action",
                     "type": "Button",
                     "id": "6dbd5699-278c-49b0-b68f-743035141627",
                     "expectedControlType": "",
@@ -24,7 +24,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Parry",
+                    "action": "Action",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

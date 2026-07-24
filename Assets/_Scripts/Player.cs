@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -15,15 +16,19 @@ public class Player : MonoBehaviour
     public int health;
     [SerializeField] private float parryCooldown;
 
-    [Header("State")]
+    [Header("State & Actions")]
     public bool attackingState;
+    public bool playerActions;
+    public event Action onActionPerformed;
 
-    [Header("Controller")]
+    [Header("Controllers/Managers")]
     private CharacterController controller;
+    private QTEManager qteManager;
 
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
+        qteManager = FindAnyObjectByType<QTEManager>();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -48,11 +53,22 @@ public class Player : MonoBehaviour
         diceValueThree = diceSlotThree.Roll();
     }
 
-    public void Parry(InputAction.CallbackContext context)
+    public void PerformAction(InputAction.CallbackContext context)
     {
-        if (context.performed && parryCooldown <= 0)
+        if (context.performed && playerActions)
         {
-            Debug.Log("Parry");
+            onActionPerformed?.Invoke();
+
+            //if (attackingState)
+            //{
+            //    Debug.Log("Attack");
+
+            //}
+
+            //if (!attackingState && parryCooldown <= 0)
+            //{
+            //    Debug.Log("Parry");
+            //}
         }
     }
 
