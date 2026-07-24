@@ -37,16 +37,12 @@ public class GameManager : MonoBehaviour
 
         if (coin == 0)
         { 
-            //Player starts first
-            playerScript.attackingState = true;
-            enemyScript.attackingState = false;
+            //Player starts first           
         }
 
         if (coin == 1) 
         {
-            //Enemy Starts First
-            playerScript.attackingState = false;
-            enemyScript.attackingState = true;
+            //Enemy Starts First            
         }
     }
 

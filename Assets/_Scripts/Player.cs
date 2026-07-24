@@ -15,9 +15,9 @@ public class Player : MonoBehaviour
     [Header("Player Status")]
     public int health;
     [SerializeField] private float parryCooldown;
+    private float currentParryCooldown;
 
     [Header("State & Actions")]
-    public bool attackingState;
     public bool playerActions;
     public event Action onActionPerformed;
 
@@ -43,6 +43,10 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (currentParryCooldown > 0)
+        {
+            currentParryCooldown -= Time.deltaTime;
+        }
     }
 
     //Roll the player's existing dice
@@ -58,18 +62,41 @@ public class Player : MonoBehaviour
         if (context.performed && playerActions)
         {
             onActionPerformed?.Invoke();
-
-            //if (attackingState)
-            //{
-            //    Debug.Log("Attack");
-
-            //}
-
-            //if (!attackingState && parryCooldown <= 0)
-            //{
-            //    Debug.Log("Parry");
-            //}
         }
     }
 
+
+    //Health
+    public void TakeDamage(int damage)
+    { 
+        health -= damage;
+
+        if (health <= 0)
+        { 
+            health = 0;
+            Debug.Log("Die");
+        }
+    }
+
+    public void HealDamage(int amount)
+    { 
+        health += amount;
+    }
+
+
+    //Helper Functions
+    public bool CanParry()
+    {
+        return currentParryCooldown <= 0;
+    }
+
+    public void TriggerParryCooldown()
+    { 
+        currentParryCooldown = parryCooldown;
+    }
+
+    public float GetRemainingParryCooldown()
+    {
+        return MathF.Max(currentParryCooldown, 0f);
+    }
 }

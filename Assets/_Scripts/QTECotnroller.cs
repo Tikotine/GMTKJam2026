@@ -35,10 +35,20 @@ public class QTECotnroller : MonoBehaviour
         playerScript.onActionPerformed += OnPlayerActionPerformed;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDestroy()
     {
-        
+        if (playerScript != null)
+        {
+            playerScript.onActionPerformed -= OnPlayerActionPerformed;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (playerScript != null)
+        {
+            playerScript.onActionPerformed -= OnPlayerActionPerformed;
+        }
     }
 
     private void OnPlayerActionPerformed()
@@ -56,12 +66,14 @@ public class QTECotnroller : MonoBehaviour
         inputReceived = true;
     }
 
-    private void OnDestroy()
+    public void StartQTE()
     {
-        if (playerScript != null) 
+        if (qteActive)
         {
-            playerScript.onActionPerformed -= OnPlayerActionPerformed;
+            return;
         }
+
+        StartCoroutine(QTESequence());
     }
 
     private IEnumerator QTESequence()
@@ -130,20 +142,10 @@ public class QTECotnroller : MonoBehaviour
         }
     }
 
-    public void StartQTE()
-    {
-        if (qteActive)
-        {
-            return;
-        }
-
-        StartCoroutine(QTESequence());
-    }
-
     private void FinishQTE()
     { 
         qteActive = false;
-        Debug.Log("Result: " + qteResult);
+        Debug.Log("Result: " + qteResult);  //Correct
         OnQTEFinished?.Invoke();
     }
 }
