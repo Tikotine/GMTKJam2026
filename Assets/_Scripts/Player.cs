@@ -45,9 +45,9 @@ public class Player : MonoBehaviour
 
         ResetModifierAssignment();
 
-        Debug.Log("Dice 1: " + diceValueOne);
-        Debug.Log("Dice 2: " + diceValueTwo);
-        Debug.Log("Dice 3: " + diceValueThree);
+        //Debug.Log("Dice 1: " + diceValueOne);
+        //Debug.Log("Dice 2: " + diceValueTwo);
+        //Debug.Log("Dice 3: " + diceValueThree);
         onDiceRolled?.Invoke();
     }
 

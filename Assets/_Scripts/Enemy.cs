@@ -76,9 +76,9 @@ public class Enemy : MonoBehaviour
 
         AssignModifiers(isAttacking);
 
-        Debug.Log("Enemy Dice 1: " + diceValueOne);
-        Debug.Log("Enemy Dice 2: " + diceValueTwo);
-        Debug.Log("Enemy Dice 3: " + diceValueThree);
+        //Debug.Log("Enemy Dice 1: " + diceValueOne);
+        //Debug.Log("Enemy Dice 2: " + diceValueTwo);
+        //Debug.Log("Enemy Dice 3: " + diceValueThree);
 
         Debug.Log("Enemy Modifier Assignment: Attack Count " + modifierAssignment.attackCountModifier + ", Tempo " + modifierAssignment.tempoModifier + ", Break Duration " + modifierAssignment.breakDurationModifier);
     }

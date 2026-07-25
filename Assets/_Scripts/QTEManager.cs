@@ -28,10 +28,17 @@ public class QTEManager : MonoBehaviour
 
     public TextMeshProUGUI counter;
 
+    [Header("Orbs")]
+    private AttackOrbController playerOrbs;
+    private AttackOrbController enemyOrbs;
+
     private void Awake()
     {
         playerScript = FindAnyObjectByType<Player>();
         enemyScript = FindAnyObjectByType<Enemy>();
+
+        playerOrbs = playerScript.GetComponentInChildren<AttackOrbController>();
+        enemyOrbs = enemyScript.GetComponentInChildren<AttackOrbController>();
     }
 
     public void StartCombatSequence(bool playerIsAttacking, int attackerAttackCount, float attackerTempo, float attackerBreakDuration, float defenderTempo, float defenderBreakDuration)
@@ -47,6 +54,9 @@ public class QTEManager : MonoBehaviour
 
     private IEnumerator CombatSequence(bool playerIsAttacking, int attackerAttackCount, float attackerTempo, float attackerBreakDuration, float defenderTempo, float defenderBreakDuration)
     {
+        AttackOrbController attackerOrbs = playerIsAttacking ? playerOrbs : enemyOrbs;
+        Debug.Log($"Attacker is {(playerIsAttacking ? "Player" : "Enemy")}");
+        Debug.Log($"Orb controller = {attackerOrbs?.gameObject.name}");
         combatInProgress = true;
 
         int successfulAttacks = 0;
@@ -92,10 +102,12 @@ public class QTEManager : MonoBehaviour
             {
                 case QTEController.QTEResult.SUCCESS:
                     successfulAttacks++;
+                    attackerOrbs.AddOrb(false);
                     break;
 
                 case QTEController.QTEResult.PERFECT:
                     perfectAttacks++;
+                    attackerOrbs.AddOrb(true);
                     break;
 
                 case QTEController.QTEResult.MISS:
@@ -128,6 +140,7 @@ public class QTEManager : MonoBehaviour
 
         for (int i = 0; i < attacksToDefend; i++)
         {
+            
             if (i > 0)
             {
                 yield return DefenderCooldown(defenderParryCooldown, defenderTempo);
@@ -152,6 +165,7 @@ public class QTEManager : MonoBehaviour
             totalDamage += damage;
 
             ApplyDamage(playerIsAttacking, damage);
+            attackerOrbs.RemoveFirstOrb();
 
             switch (defendResult)
             {
@@ -176,6 +190,7 @@ public class QTEManager : MonoBehaviour
         Debug.Log("========== COMBAT SEQUENCE FINISHED ==========");
         Debug.Log("Total Damage: " + totalDamage);
 
+        attackerOrbs.Clear();
         combatInProgress = false;
 
         OnSequenceFinished?.Invoke(new SequenceResult(successfulAttacks, perfectAttacks, successfulDefends, perfectDefends, totalDamage));
