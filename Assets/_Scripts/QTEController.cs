@@ -38,9 +38,12 @@ public class QTEController : MonoBehaviour
 
     public QTEResult qteResult { get; private set; }
 
+    private QTEVisual visual;
+
     private void Awake()
     {
         playerScript = FindAnyObjectByType<Player>();
+        visual = GetComponent<QTEVisual>();
     }
 
     private void OnEnable()
@@ -77,6 +80,11 @@ public class QTEController : MonoBehaviour
         }
 
         tempo = Mathf.Max(0.1f, qteTempo);
+
+        float totalDuration =(earlyMissWindow + earlySuccessWindow +perfectWindow + lateSuccessWindow + lateMissWindow) / tempo;
+
+        visual.Initialise(totalDuration, perfectWindow / tempo);
+
         StartCoroutine(QTESequence());
     }
 
@@ -139,7 +147,11 @@ public class QTEController : MonoBehaviour
                 yield break;
             }
 
-            timer -= Time.deltaTime;
+            float delta = Time.deltaTime;
+
+            timer -= delta;
+
+            visual.Tick(delta);
 
             yield return null;
         }
@@ -157,6 +169,7 @@ public class QTEController : MonoBehaviour
 
         Debug.Log("QTE Result: " + qteResult);
 
+        visual.Stop();
         OnQTEFinished?.Invoke();
     }
 
