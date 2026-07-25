@@ -1176,7 +1176,7 @@ MonoBehaviour:
   modifierType: 1
   player: {fileID: 1018765610}
   valueText: {fileID: 1296537050}
-  label: {fileID: 1296537050}
+  label: Tempo
 --- !u!114 &436422671
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1272,9 +1272,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Attack Count
-
-    <size=16>Drop die here</size>'
+  m_text: Attack Count
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1830,9 +1828,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Break Duration
-
-    <size=16>Drop die here</size>'
+  m_text: Break Duration
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2605,9 +2601,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Tempo
-
-    <size=16>Drop die here</size>'
+  m_text: Tempo
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3173,7 +3167,7 @@ MonoBehaviour:
   modifierType: 0
   player: {fileID: 1018765610}
   valueText: {fileID: 487366241}
-  label: {fileID: 487366241}
+  label: Attack Count
 --- !u!114 &1580712623
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3727,7 +3721,7 @@ MonoBehaviour:
   modifierType: 2
   player: {fileID: 1018765610}
   valueText: {fileID: 617142093}
-  label: {fileID: 617142093}
+  label: Break Duration
 --- !u!114 &1731256284
 MonoBehaviour:
   m_ObjectHideFlags: 0

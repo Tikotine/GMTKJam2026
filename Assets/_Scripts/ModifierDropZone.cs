@@ -12,8 +12,7 @@ public class ModifierDropZone : MonoBehaviour, IDropHandler
     [SerializeField] private Player player;
     [SerializeField] private TMP_Text valueText;
 
-    [SerializeField] private TMP_Text label;
-    private string defaultText;
+    [SerializeField] private string label;
 
     private void Awake()
     {
@@ -22,10 +21,6 @@ public class ModifierDropZone : MonoBehaviour, IDropHandler
             player = FindAnyObjectByType<Player>();
         }
 
-        if (label != null)
-        {
-            defaultText = label.text;
-        }
 
         ClearDisplay();
     }
@@ -43,12 +38,12 @@ public class ModifierDropZone : MonoBehaviour, IDropHandler
             return;
         }
 
-        valueText.text = label + "\n<color=#FFD54A>" + FormatValue(draggedDice.GetDiceValue()) + "</color>";
+        valueText.text = FormatValue(draggedDice.GetDiceValue());
     }
 
     public void ClearDisplay()
     {
-        valueText.text = label + "\n<size=16>Drop die here</size>";
+        valueText.text = label;
     }
 
     private string FormatValue(int value)
