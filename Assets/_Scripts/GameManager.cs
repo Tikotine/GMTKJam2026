@@ -10,6 +10,13 @@ public class GameManager : MonoBehaviour
     [Header("Coin Toss")]
     [SerializeField] private int coin;
 
+    public enum TurnState
+    { 
+        PLAYER_TURN,
+        ENEMY_TURN,
+        GAME_OVER
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {

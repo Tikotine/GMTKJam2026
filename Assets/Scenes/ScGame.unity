@@ -475,9 +475,8 @@ MonoBehaviour:
   diceValueOne: 0
   diceValueTwo: 0
   diceValueThree: 0
-  health: 0
-  parryCooldown: 0
-  attackingState: 0
+  health: 100
+  parryCooldown: 0.5
   playerActions: 1
 --- !u!114 &1018765611
 MonoBehaviour:
@@ -525,6 +524,59 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!1 &1274697503
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1274697505}
+  - component: {fileID: 1274697504}
+  m_Layer: 0
+  m_Name: Enemy
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1274697504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1274697503}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 457b13f6c8e20bc47be3fa76f591ed48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Enemy
+  currentDifficulty: 0
+  maxHealth: 100
+  currentHealth: 0
+  easySuccessChance: 40
+  mediumSuccessChance: 70
+  hardSuccessChance: 90
+  easyPerfectChance: 10
+  mediumPerfectChance: 20
+  hardPerfectChance: 35
+--- !u!4 &1274697505
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1274697503}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1522334496
 GameObject:
   m_ObjectHideFlags: 0
@@ -1155,10 +1207,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4965e8dbf5caf9547ae0d64a165da692, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::QTEManager
-  attackNumber: 3
   breakDuration: 3
   tempo: 1
   qtePrefab: {fileID: 6499218180965912028, guid: 9e013d89953779c448acb73d3b81d74b, type: 3}
+  reducedDamage: 10
+  successDamage: 15
+  perfectDamage: 20
 --- !u!4 &1874620906
 Transform:
   m_ObjectHideFlags: 0
@@ -1184,3 +1238,4 @@ SceneRoots:
   - {fileID: 1018765609}
   - {fileID: 1702824572}
   - {fileID: 1874620906}
+  - {fileID: 1274697505}

@@ -15,7 +15,15 @@ public class QTEManager : MonoBehaviour
     public event Action<int, int> OnDefendSequenceFinished;
 
     [Header("Result")]
-    private QTECotnroller.QTEResult currentResult;
+    private QTECotnroller.QTEResult attackResult;
+    private QTECotnroller.QTEResult defendResult;
+
+    [Header("Enemy")]
+    private Enemy enemyScript;
+
+    [SerializeField] private int reducedDamage;
+    [SerializeField] private int successDamage;
+    [SerializeField] private int perfectDamage;
 
     private int currentAttack;
     private bool attackInProgress;
@@ -33,7 +41,9 @@ public class QTEManager : MonoBehaviour
     void Start()
     {
         playerScript = FindAnyObjectByType<Player>();
-        StartDefendRoutine(3, playerScript);
+        enemyScript = FindAnyObjectByType<Enemy>();
+        //StartDefendRoutine(3, playerScript);
+        StartEnemyAttackRoutine(3);
     }
 
     public void StartAttackSequence(int attackCount)
@@ -46,6 +56,15 @@ public class QTEManager : MonoBehaviour
         StartCoroutine(DefendRoutine(incomingAttacks, player));
     }
 
+    public void StartEnemyAttackRoutine(int attackCount)
+    {
+        StartCoroutine(EnemyAttackRoutine(attackCount));    
+    }
+
+    public void StartEnemyDefendRoutuine(int defendCount)
+    {
+        StartCoroutine(EnemyDefendRoutine(defendCount));
+    }
 
     //Attack
     private IEnumerator AttackRoutine(int attackCount)
@@ -56,9 +75,14 @@ public class QTEManager : MonoBehaviour
         for (int i = 0; i < attackCount; i++)
         {
             yield return BreakTimer();
-            yield return StartQTE();
+            yield return StartQTE(result => attackResult = result); //Player performs attack QTE
+            defendResult = enemyScript.RollAIResult(); //Enemy Defends
 
-            switch (currentResult)
+            int damage = CalculateDamage(attackResult, defendResult);
+            enemyScript.TakeDamage(damage);
+
+            //Counting
+            switch (attackResult)
             { 
                 case QTECotnroller.QTEResult.SUCCESS:
                     successfulHits++;
@@ -90,19 +114,22 @@ public class QTEManager : MonoBehaviour
         for (int i = 0; i < incomingAttacks; i++)
         {
             yield return BreakTimer();
-            yield return StartQTE();
+            yield return StartQTE(result => defendResult = result);
 
-            switch (currentResult)
+            switch (defendResult)
             { 
                 case QTECotnroller.QTEResult.SUCCESS:
                     successfulParries++;
+                    Debug.Log("Player Defend Success");
                     break;
 
                 case QTECotnroller .QTEResult.PERFECT:
+                    Debug.Log("Player Defend Perfect");
                     perfectParries++;
                     break;
 
                 case QTECotnroller.QTEResult.MISS:
+                    Debug.Log("Player Defend Miss");
                     break;
             }
         }
@@ -112,6 +139,75 @@ public class QTEManager : MonoBehaviour
         OnDefendSequenceFinished?.Invoke(successfulParries, perfectParries);
 
         yield break;
+    }
+
+    private IEnumerator EnemyAttackRoutine(int attackCount)
+    {
+        int successfulHits = 0;
+        int perfectHits = 0;
+
+        for (int i = 0; i < attackCount; i++) 
+        {
+            yield return BreakTimer();
+
+            QTECotnroller.QTEResult enemyAttack = enemyScript.RollAIResult(); //Enemy Attack
+
+            yield return StartQTE(result => defendResult = result);
+            int damage = CalculateDamage(enemyAttack, defendResult);
+
+            playerScript.TakeDamage(damage);
+
+            switch (enemyAttack) 
+            {
+                case QTECotnroller.QTEResult.SUCCESS:
+                    successfulHits++;
+                    Debug.Log("Enemy Attack Success");
+                    //playerScript.TakeDamage(successDamage); 
+                    break;
+
+                case QTECotnroller.QTEResult.PERFECT:
+                    perfectHits++;
+                    Debug.Log("Enemy Attack Perfect");
+                    //playerScript.TakeDamage(perfectDamage); 
+                    break;
+
+                case QTECotnroller.QTEResult.MISS:
+                    Debug.Log("Enemy Attack Interrupted");
+                    i = attackCount; //Exit Loop
+                    break;
+            }
+        }
+
+        OnAttackSequenceFinished?.Invoke(successfulHits, perfectHits);
+    }
+
+    private IEnumerator EnemyDefendRoutine(int attackCount)
+    {
+        int successfulParries = 0;
+        int perfectParries = 0;
+
+        for (int i = 0; i < attackCount; i++) 
+        { 
+            yield return BreakTimer();
+
+            QTECotnroller.QTEResult defendResult = enemyScript.RollAIResult();
+
+            switch (defendResult) 
+            {
+                case QTECotnroller.QTEResult.SUCCESS:
+                    successfulParries++;
+                    break;
+
+                case QTECotnroller.QTEResult.PERFECT:
+                    perfectParries++;
+                    break;
+
+                case QTECotnroller.QTEResult.MISS:
+                    break;
+            }
+        }
+
+        OnDefendSequenceFinished?.Invoke(successfulParries, perfectParries);
     }
 
     private IEnumerator BreakTimer()
@@ -127,7 +223,7 @@ public class QTEManager : MonoBehaviour
         yield break;
     }
 
-    private IEnumerator StartQTE()
+    private IEnumerator StartQTE(Action<QTECotnroller.QTEResult> callback)
     {
         QTECotnroller currentQTE = Instantiate(qtePrefab);
 
@@ -135,9 +231,9 @@ public class QTEManager : MonoBehaviour
 
         currentQTE.OnQTEFinished += () =>
         {
-            currentResult = currentQTE.qteResult;
+            callback(currentQTE.qteResult);
 
-            Debug.Log("Manager Received "+ currentResult);
+            Debug.Log("Manager Received "+ currentQTE.qteResult);
 
             qteFinished = true;
         };
@@ -152,5 +248,49 @@ public class QTEManager : MonoBehaviour
         yield break;
     }
 
+    //Helper Function
+    private int CalculateDamage(QTECotnroller.QTEResult attack, QTECotnroller.QTEResult defend)
+    { 
+        switch (attack) 
+        {
+            case QTECotnroller.QTEResult.PERFECT:
+
+                switch (defend)
+                { 
+                    case QTECotnroller.QTEResult.MISS:
+                        return perfectDamage;
+
+                    case QTECotnroller.QTEResult.SUCCESS: 
+                        return reducedDamage;
+
+                    case QTECotnroller.QTEResult.PERFECT:
+                        return 0;
+                }
+
+                break;
+
+
+            case QTECotnroller.QTEResult.SUCCESS:
+
+                switch (defend)
+                {
+                    case QTECotnroller.QTEResult.MISS:
+                        return successDamage;
+
+                    case QTECotnroller.QTEResult.SUCCESS:
+                        return 0;
+
+                    case QTECotnroller.QTEResult.PERFECT:
+                        return 0;
+                }
+
+                break;
+
+            case QTECotnroller.QTEResult.MISS:
+                return 0;
+        }
+
+        return 0;
+    }
 }
     

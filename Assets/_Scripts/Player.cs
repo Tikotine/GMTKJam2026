@@ -70,6 +70,10 @@ public class Player : MonoBehaviour
     public void TakeDamage(int damage)
     { 
         health -= damage;
+        health = Mathf.Max(health, 0);
+
+        Debug.Log($"Player Taking {damage} damage");
+        Debug.Log($"Player HP: {health}");
 
         if (health <= 0)
         { 
