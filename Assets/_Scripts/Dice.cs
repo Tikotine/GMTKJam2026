@@ -1,16 +1,24 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New Dice", menuName = "Dice")]
+[CreateAssetMenu(fileName = "Dice", menuName = "Combat/Dice")]
 public class Dice : ScriptableObject
 {
-    //Dice Stats
-    public string diceName;
-    public int minValue;
-    public int maxValue;
+    [Header("Dice Settings")]
+    [SerializeField] private int minimumValue = 1;
+    [SerializeField] private int maximumValue = 6;
 
-    //Return a roll value
     public int Roll()
     {
-        return Random.Range(minValue, maxValue + 1);
+        return Random.Range(minimumValue, maximumValue + 1);
+    }
+
+    public int GetMinimumValue()
+    {
+        return minimumValue;
+    }
+
+    public int GetMaximumValue()
+    {
+        return maximumValue;
     }
 }

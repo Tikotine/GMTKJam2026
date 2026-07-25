@@ -1,45 +1,53 @@
 using System;
 using System.Collections;
-using UnityEngine.InputSystem;
 using UnityEngine;
 
-public class QTECotnroller : MonoBehaviour
+public class QTEController : MonoBehaviour
 {
     public enum QTEResult
-    { 
+    {
         PERFECT,
         SUCCESS,
         MISS
     }
 
     [Header("QTE Timing")]
-    public float earlyMissWindow;
-    public float earlySuccessWindow;
-    public float perfectWindow;
-    public float lateSuccessWindow;
-    public float lateMissWindow;
+    [Tooltip("Duration of the early miss window.")]
+    [SerializeField] private float earlyMissWindow = 0.5f;
+
+    [Tooltip("Duration of the early success window.")]
+    [SerializeField] private float earlySuccessWindow = 0.5f;
+
+    [Tooltip("Duration of the perfect window.")]
+    [SerializeField] private float perfectWindow = 0.25f;
+
+    [Tooltip("Duration of the late success window.")]
+    [SerializeField] private float lateSuccessWindow = 0.5f;
+
+    [Tooltip("Duration of the late miss window.")]
+    [SerializeField] private float lateMissWindow = 0.5f;
 
     public event Action OnQTEFinished;
 
     private bool qteActive;
     private bool inputReceived;
+    private bool qteFinished;
+    private float tempo = 1f;
 
-    [Header("References")]
     private Player playerScript;
-    public QTEResult qteResult;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public QTEResult qteResult { get; private set; }
+
+    private void Awake()
     {
         playerScript = FindAnyObjectByType<Player>();
-        playerScript.onActionPerformed += OnPlayerActionPerformed;
     }
 
-    private void OnDestroy()
+    private void OnEnable()
     {
         if (playerScript != null)
         {
-            playerScript.onActionPerformed -= OnPlayerActionPerformed;
+            playerScript.onActionPerformed += OnPlayerActionPerformed;
         }
     }
 
@@ -53,12 +61,7 @@ public class QTECotnroller : MonoBehaviour
 
     private void OnPlayerActionPerformed()
     {
-        if (!qteActive)
-        {
-            return;
-        }
-
-        if (inputReceived) 
+        if (!qteActive || inputReceived)
         {
             return;
         }
@@ -66,13 +69,14 @@ public class QTECotnroller : MonoBehaviour
         inputReceived = true;
     }
 
-    public void StartQTE()
+    public void StartQTE(float qteTempo = 1f)
     {
         if (qteActive)
         {
             return;
         }
 
+        tempo = Mathf.Max(0.1f, qteTempo);
         StartCoroutine(QTESequence());
     }
 
@@ -80,59 +84,58 @@ public class QTECotnroller : MonoBehaviour
     {
         qteActive = true;
         inputReceived = false;
-
-        //Early Miss
-        yield return WaitForWindow(earlyMissWindow, QTEResult.MISS);
-        if (!qteActive)
-        {
-            yield break;
-        }
-
-        //Early Success
-        yield return WaitForWindow(earlySuccessWindow, QTEResult.SUCCESS);
-        if (!qteActive)
-        {
-            yield break;
-        }
-
-        //Perfect
-        yield return WaitForWindow(perfectWindow, QTEResult.PERFECT);
-        if (!qteActive)
-        {
-            yield break;
-        }
-
-        //Late Success
-        yield return WaitForWindow(lateSuccessWindow, QTEResult.SUCCESS);
-        if (!qteActive)
-        {
-            yield break;
-        }
-
-        //Late Miss
-        yield return WaitForWindow(lateMissWindow, QTEResult.MISS);
-        if (!qteActive)
-        {
-            yield break;
-        }
-
-        //No Input
+        qteFinished = false;
         qteResult = QTEResult.MISS;
 
+        yield return WaitForWindow(earlyMissWindow, QTEResult.MISS);
+
+        if (qteFinished)
+        {
+            yield break;
+        }
+
+        yield return WaitForWindow(earlySuccessWindow, QTEResult.SUCCESS);
+
+        if (qteFinished)
+        {
+            yield break;
+        }
+
+        yield return WaitForWindow(perfectWindow, QTEResult.PERFECT);
+
+        if (qteFinished)
+        {
+            yield break;
+        }
+
+        yield return WaitForWindow(lateSuccessWindow, QTEResult.SUCCESS);
+
+        if (qteFinished)
+        {
+            yield break;
+        }
+
+        yield return WaitForWindow(lateMissWindow, QTEResult.MISS);
+
+        if (qteFinished)
+        {
+            yield break;
+        }
+
+        qteResult = QTEResult.MISS;
         FinishQTE();
     }
 
     private IEnumerator WaitForWindow(float duration, QTEResult result)
     {
-        float timer = duration;
+        float timer = duration / tempo;
 
-        while (timer > 0) 
+        while (timer > 0f)
         {
             if (inputReceived)
             {
                 qteResult = result;
                 FinishQTE();
-
                 yield break;
             }
 
@@ -143,9 +146,27 @@ public class QTECotnroller : MonoBehaviour
     }
 
     private void FinishQTE()
-    { 
+    {
+        if (!qteActive)
+        {
+            return;
+        }
+
         qteActive = false;
-        Debug.Log("Result: " + qteResult);  //Correct
+        qteFinished = true;
+
+        Debug.Log("QTE Result: " + qteResult);
+
         OnQTEFinished?.Invoke();
+    }
+
+    public bool IsQTEActive()
+    {
+        return qteActive;
+    }
+
+    public bool HasFinished()
+    {
+        return qteFinished;
     }
 }

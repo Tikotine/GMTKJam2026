@@ -1,296 +1,345 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class QTEManager : MonoBehaviour
 {
-    [Header("Attack Settings")]
-    public int breakDuration;
-    public int tempo;
-
     [Header("QTE")]
-    [SerializeField] private QTECotnroller qtePrefab;
+    [SerializeField] private QTEController qtePrefab;
 
-    public event Action<int, int> OnAttackSequenceFinished;
-    public event Action<int, int> OnDefendSequenceFinished;
+    [Header("Damage")]
+    [SerializeField] private int reducedDamage = 5;
+    [SerializeField] private int successDamage = 10;
+    [SerializeField] private int perfectDamage = 20;
 
-    [Header("Result")]
-    private QTECotnroller.QTEResult attackResult;
-    private QTECotnroller.QTEResult defendResult;
+    [Header("Defend Timing")]
+    [SerializeField] private float defenderParryCooldown = 0.5f;
 
-    [Header("Enemy")]
+    [Header("References")]
+    private Player playerScript;
     private Enemy enemyScript;
 
-    [SerializeField] private int reducedDamage;
-    [SerializeField] private int successDamage;
-    [SerializeField] private int perfectDamage;
+    [Header("Combat State")]
+    private bool combatInProgress;
 
-    private int currentAttack;
-    private bool attackInProgress;
+    public event Action<SequenceResult> OnSequenceFinished;
 
-    private Player playerScript;
+    public TextMeshProUGUI counter;
 
-    public enum SequenceType
-    { 
-        ATTACK,
-        DEFEND
-    }
-
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Awake()
     {
         playerScript = FindAnyObjectByType<Player>();
         enemyScript = FindAnyObjectByType<Enemy>();
-        //StartDefendRoutine(3, playerScript);
-        StartEnemyAttackRoutine(3);
     }
 
-    public void StartAttackSequence(int attackCount)
+    public void StartCombatSequence(bool playerIsAttacking, int attackerAttackCount, float attackerTempo, float attackerBreakDuration, float defenderTempo, float defenderBreakDuration)
     {
-        StartCoroutine(AttackRoutine(attackCount));
-    }
-
-    public void StartDefendRoutine(int incomingAttacks, Player player)
-    {
-        StartCoroutine(DefendRoutine(incomingAttacks, player));
-    }
-
-    public void StartEnemyAttackRoutine(int attackCount)
-    {
-        StartCoroutine(EnemyAttackRoutine(attackCount));    
-    }
-
-    public void StartEnemyDefendRoutuine(int defendCount)
-    {
-        StartCoroutine(EnemyDefendRoutine(defendCount));
-    }
-
-    //Attack
-    private IEnumerator AttackRoutine(int attackCount)
-    {
-        int successfulHits = 0;
-        int perfectHits = 0;
-
-        for (int i = 0; i < attackCount; i++)
+        if (combatInProgress)
         {
-            yield return BreakTimer();
-            yield return StartQTE(result => attackResult = result); //Player performs attack QTE
-            defendResult = enemyScript.RollAIResult(); //Enemy Defends
+            Debug.LogWarning("A combat sequence is already in progress.");
+            return;
+        }
 
-            int damage = CalculateDamage(attackResult, defendResult);
-            enemyScript.TakeDamage(damage);
+        StartCoroutine(CombatSequence(playerIsAttacking, attackerAttackCount, attackerTempo, attackerBreakDuration, defenderTempo, defenderBreakDuration));
+    }
 
-            //Counting
+    private IEnumerator CombatSequence(bool playerIsAttacking, int attackerAttackCount, float attackerTempo, float attackerBreakDuration, float defenderTempo, float defenderBreakDuration)
+    {
+        combatInProgress = true;
+
+        int successfulAttacks = 0;
+        int perfectAttacks = 0;
+        int successfulDefends = 0;
+        int perfectDefends = 0;
+        int totalDamage = 0;
+
+        List<QTEController.QTEResult> attackResults = new List<QTEController.QTEResult>();
+
+        Debug.Log("========== ATTACK PHASE ==========");
+
+        if (attackerAttackCount <= 0)
+        {
+            Debug.Log("Attacker has 0 attacks.");
+            Debug.Log("Attacker's turn is skipped.");
+
+            combatInProgress = false;
+            OnSequenceFinished?.Invoke(new SequenceResult(successfulAttacks, perfectAttacks, successfulDefends, perfectDefends, totalDamage));
+            yield break;
+        }
+
+        for (int i = 0; i < attackerAttackCount; i++)
+        {
+            yield return BreakTimer(attackerBreakDuration, attackerTempo);
+
+            QTEController.QTEResult attackResult = QTEController.QTEResult.MISS;
+
+            if (playerIsAttacking)
+            {
+                yield return StartPlayerQTE(attackerTempo, result => attackResult = result);
+            }
+            else
+            {
+                attackResult = enemyScript.RollAIResult();
+            }
+
+            attackResults.Add(attackResult);
+
+            Debug.Log("Attack " + (i + 1) + " Result: " + attackResult);
+
             switch (attackResult)
-            { 
-                case QTECotnroller.QTEResult.SUCCESS:
-                    successfulHits++;
+            {
+                case QTEController.QTEResult.SUCCESS:
+                    successfulAttacks++;
                     break;
 
-                case QTECotnroller.QTEResult.PERFECT:
-                    perfectHits++; 
+                case QTEController.QTEResult.PERFECT:
+                    perfectAttacks++;
                     break;
 
-                case QTECotnroller.QTEResult.MISS:
-                    Debug.Log("Attack Interrupted");
-                    i = attackCount; //Exit Loop
+                case QTEController.QTEResult.MISS:
+                    Debug.Log("Attacker missed.");
+                    Debug.Log("Attack phase interrupted.");
+                    i = attackerAttackCount;
                     break;
             }
         }
 
-        Debug.Log($"Attack Finished. Success: {successfulHits} , Perfect: {perfectHits}");
+        int totalSuccessfulAttacks = successfulAttacks + perfectAttacks;
 
-        OnAttackSequenceFinished?.Invoke(successfulHits, perfectHits);
+        Debug.Log("Attack Phase Finished.");
+        Debug.Log("Successful Attacks: " + successfulAttacks);
+        Debug.Log("Perfect Attacks: " + perfectAttacks);
 
-        yield break;
-    }
-
-    private IEnumerator DefendRoutine(int incomingAttacks, Player player)
-    {
-        int successfulParries = 0;
-        int perfectParries = 0;
-
-        for (int i = 0; i < incomingAttacks; i++)
+        if (totalSuccessfulAttacks <= 0)
         {
-            yield return BreakTimer();
-            yield return StartQTE(result => defendResult = result);
+            Debug.Log("No successful or perfect attacks.");
+            Debug.Log("Attacker's turn is skipped.");
+
+            combatInProgress = false;
+            OnSequenceFinished?.Invoke(new SequenceResult(successfulAttacks, perfectAttacks, successfulDefends, perfectDefends, totalDamage));
+            yield break;
+        }
+
+        Debug.Log("========== DEFEND PHASE ==========");
+
+        int attacksToDefend = totalSuccessfulAttacks;
+
+        for (int i = 0; i < attacksToDefend; i++)
+        {
+            if (i > 0)
+            {
+                yield return DefenderCooldown(defenderParryCooldown, defenderTempo);
+            }
+
+            QTEController.QTEResult defendResult = QTEController.QTEResult.MISS;
+
+            if (playerIsAttacking)
+            {
+                defendResult = enemyScript.RollAIResult();
+            }
+            else
+            {
+                yield return StartPlayerQTE(defenderTempo, result => defendResult = result);
+            }
+
+            Debug.Log("Defend " + (i + 1) + " Result: " + defendResult);
+
+            QTEController.QTEResult attackResult = GetSuccessfulAttackResult(attackResults, i);
+            int damage = CalculateDamage(attackResult, defendResult);
+
+            totalDamage += damage;
+
+            ApplyDamage(playerIsAttacking, damage);
 
             switch (defendResult)
-            { 
-                case QTECotnroller.QTEResult.SUCCESS:
-                    successfulParries++;
-                    Debug.Log("Player Defend Success");
+            {
+                case QTEController.QTEResult.SUCCESS:
+                    successfulDefends++;
                     break;
 
-                case QTECotnroller .QTEResult.PERFECT:
-                    Debug.Log("Player Defend Perfect");
-                    perfectParries++;
+                case QTEController.QTEResult.PERFECT:
+                    perfectDefends++;
                     break;
 
-                case QTECotnroller.QTEResult.MISS:
-                    Debug.Log("Player Defend Miss");
+                case QTEController.QTEResult.MISS:
                     break;
+            }
+
+            if (IsCombatOver())
+            {
+                break;
             }
         }
 
-        Debug.Log($"Defend Sequence Finished Success: {successfulParries} , Perfect: {perfectParries}" );
+        Debug.Log("========== COMBAT SEQUENCE FINISHED ==========");
+        Debug.Log("Total Damage: " + totalDamage);
 
-        OnDefendSequenceFinished?.Invoke(successfulParries, perfectParries);
+        combatInProgress = false;
 
-        yield break;
+        OnSequenceFinished?.Invoke(new SequenceResult(successfulAttacks, perfectAttacks, successfulDefends, perfectDefends, totalDamage));
     }
 
-    private IEnumerator EnemyAttackRoutine(int attackCount)
+    private QTEController.QTEResult GetSuccessfulAttackResult(List<QTEController.QTEResult> attackResults, int successfulAttackIndex)
     {
-        int successfulHits = 0;
-        int perfectHits = 0;
+        int currentSuccessfulAttack = 0;
 
-        for (int i = 0; i < attackCount; i++) 
+        for (int i = 0; i < attackResults.Count; i++)
         {
-            yield return BreakTimer();
+            QTEController.QTEResult result = attackResults[i];
 
-            QTECotnroller.QTEResult enemyAttack = enemyScript.RollAIResult(); //Enemy Attack
-
-            yield return StartQTE(result => defendResult = result);
-            int damage = CalculateDamage(enemyAttack, defendResult);
-
-            playerScript.TakeDamage(damage);
-
-            switch (enemyAttack) 
+            if (result != QTEController.QTEResult.SUCCESS && result != QTEController.QTEResult.PERFECT)
             {
-                case QTECotnroller.QTEResult.SUCCESS:
-                    successfulHits++;
-                    Debug.Log("Enemy Attack Success");
-                    //playerScript.TakeDamage(successDamage); 
-                    break;
-
-                case QTECotnroller.QTEResult.PERFECT:
-                    perfectHits++;
-                    Debug.Log("Enemy Attack Perfect");
-                    //playerScript.TakeDamage(perfectDamage); 
-                    break;
-
-                case QTECotnroller.QTEResult.MISS:
-                    Debug.Log("Enemy Attack Interrupted");
-                    i = attackCount; //Exit Loop
-                    break;
+                continue;
             }
+
+            if (currentSuccessfulAttack == successfulAttackIndex)
+            {
+                return result;
+            }
+
+            currentSuccessfulAttack++;
         }
 
-        OnAttackSequenceFinished?.Invoke(successfulHits, perfectHits);
+        return QTEController.QTEResult.MISS;
     }
 
-    private IEnumerator EnemyDefendRoutine(int attackCount)
+    private IEnumerator BreakTimer(float breakDuration, float tempo)
     {
-        int successfulParries = 0;
-        int perfectParries = 0;
-
-        for (int i = 0; i < attackCount; i++) 
-        { 
-            yield return BreakTimer();
-
-            QTECotnroller.QTEResult defendResult = enemyScript.RollAIResult();
-
-            switch (defendResult) 
-            {
-                case QTECotnroller.QTEResult.SUCCESS:
-                    successfulParries++;
-                    break;
-
-                case QTECotnroller.QTEResult.PERFECT:
-                    perfectParries++;
-                    break;
-
-                case QTECotnroller.QTEResult.MISS:
-                    break;
-            }
-        }
-
-        OnDefendSequenceFinished?.Invoke(successfulParries, perfectParries);
-    }
-
-    private IEnumerator BreakTimer()
-    { 
         float timer = breakDuration;
 
-        while (timer > 0) 
+        while (timer > 0f)
+        {
+            timer -= Time.deltaTime * tempo;
+            // Prevent the displayed value from going below 0
+            float displayTime = Mathf.Max(timer, 0f);
+            // Update the UI counter
+            counter.text = displayTime.ToString("F2");
+
+            yield return null;
+        }
+
+        counter.text = "0.00";
+    }
+
+    private IEnumerator DefenderCooldown(float cooldownDuration, float tempo)
+    {
+        float timer = cooldownDuration;
+
+        while (timer > 0f)
         {
             timer -= Time.deltaTime * tempo;
             yield return null;
         }
-
-        yield break;
     }
 
-    private IEnumerator StartQTE(Action<QTECotnroller.QTEResult> callback)
+    private IEnumerator StartPlayerQTE(float tempo, Action<QTEController.QTEResult> callback)
     {
-        QTECotnroller currentQTE = Instantiate(qtePrefab);
+        QTEController currentQTE = Instantiate(qtePrefab);
 
         bool qteFinished = false;
 
         currentQTE.OnQTEFinished += () =>
         {
             callback(currentQTE.qteResult);
-
-            Debug.Log("Manager Received "+ currentQTE.qteResult);
-
+            Debug.Log("Manager Received " + currentQTE.qteResult);
             qteFinished = true;
         };
 
-        currentQTE.StartQTE();
+        currentQTE.StartQTE(tempo);
 
-        //Wait for QTE To finish
         yield return new WaitUntil(() => qteFinished);
 
         Destroy(currentQTE.gameObject);
-
-        yield break;
     }
 
-    //Helper Function
-    private int CalculateDamage(QTECotnroller.QTEResult attack, QTECotnroller.QTEResult defend)
-    { 
-        switch (attack) 
+    private int CalculateDamage(QTEController.QTEResult attack, QTEController.QTEResult defend)
+    {
+        switch (attack)
         {
-            case QTECotnroller.QTEResult.PERFECT:
-
-                switch (defend)
-                { 
-                    case QTECotnroller.QTEResult.MISS:
-                        return perfectDamage;
-
-                    case QTECotnroller.QTEResult.SUCCESS: 
-                        return reducedDamage;
-
-                    case QTECotnroller.QTEResult.PERFECT:
-                        return 0;
-                }
-
-                break;
-
-
-            case QTECotnroller.QTEResult.SUCCESS:
-
+            case QTEController.QTEResult.PERFECT:
                 switch (defend)
                 {
-                    case QTECotnroller.QTEResult.MISS:
-                        return successDamage;
+                    case QTEController.QTEResult.MISS:
+                        return perfectDamage;
 
-                    case QTECotnroller.QTEResult.SUCCESS:
-                        return 0;
+                    case QTEController.QTEResult.SUCCESS:
+                        return reducedDamage;
 
-                    case QTECotnroller.QTEResult.PERFECT:
+                    case QTEController.QTEResult.PERFECT:
                         return 0;
                 }
-
                 break;
 
-            case QTECotnroller.QTEResult.MISS:
+            case QTEController.QTEResult.SUCCESS:
+                switch (defend)
+                {
+                    case QTEController.QTEResult.MISS:
+                        return successDamage;
+
+                    case QTEController.QTEResult.SUCCESS:
+                        return 0;
+
+                    case QTEController.QTEResult.PERFECT:
+                        return 0;
+                }
+                break;
+
+            case QTEController.QTEResult.MISS:
                 return 0;
         }
 
         return 0;
     }
+
+    private void ApplyDamage(bool playerIsAttacking, int damage)
+    {
+        if (damage <= 0)
+        {
+            return;
+        }
+
+        if (playerIsAttacking)
+        {
+            enemyScript.TakeDamage(damage);
+        }
+        else
+        {
+            playerScript.TakeDamage(damage);
+        }
+    }
+
+    private bool IsCombatOver()
+    {
+        if (playerScript == null || enemyScript == null)
+        {
+            return false;
+        }
+
+        return playerScript.health <= 0 || enemyScript.currentHealth <= 0;
+    }
+
+    public bool IsCombatInProgress()
+    {
+        return combatInProgress;
+    }
+
+    public class SequenceResult
+    {
+        public int successfulAttacks;
+        public int perfectAttacks;
+        public int successfulDefends;
+        public int perfectDefends;
+        public int totalDamage;
+
+        public SequenceResult(int successfulAttacks, int perfectAttacks, int successfulDefends, int perfectDefends, int totalDamage)
+        {
+            this.successfulAttacks = successfulAttacks;
+            this.perfectAttacks = perfectAttacks;
+            this.successfulDefends = successfulDefends;
+            this.perfectDefends = perfectDefends;
+            this.totalDamage = totalDamage;
+        }
+    }
 }
-    
