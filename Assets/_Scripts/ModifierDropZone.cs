@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -9,15 +10,23 @@ public class ModifierDropZone : MonoBehaviour, IDropHandler
 
     [Header("References")]
     [SerializeField] private Player player;
-    [SerializeField] private Text valueText;
-    [SerializeField] private string label;
+    [SerializeField] private TMP_Text valueText;
 
-    public void Configure(PlayerDiceDrag.DiceType type, Player assignedPlayer, Text assignedValueText, string displayLabel)
+    [SerializeField] private TMP_Text label;
+    private string defaultText;
+
+    private void Awake()
     {
-        modifierType = type;
-        player = assignedPlayer;
-        valueText = assignedValueText;
-        label = displayLabel;
+        if (player == null)
+        {
+            player = FindAnyObjectByType<Player>();
+        }
+
+        if (label != null)
+        {
+            defaultText = label.text;
+        }
+
         ClearDisplay();
     }
 

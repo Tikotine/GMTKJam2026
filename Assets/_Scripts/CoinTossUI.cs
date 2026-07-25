@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +12,7 @@ public class CoinTossUI : MonoBehaviour
     [SerializeField] private Button tailsButton;
     [SerializeField] private GameObject coinSelectionPanel;
     [SerializeField] private GameObject coinResultPanel;
-    [SerializeField] private Text coinResultText;
+    [SerializeField] private TMP_Text coinResultText;
 
     private void Awake()
     {
@@ -22,18 +23,6 @@ public class CoinTossUI : MonoBehaviour
     private void OnDestroy()
     {
         UnbindButtons();
-    }
-
-    public void Configure(GameManager manager, Button heads, Button tails, GameObject selectionPanel, GameObject resultPanel, Text resultText)
-    {
-        UnbindButtons();
-        gameManager = manager;
-        headsButton = heads;
-        tailsButton = tails;
-        coinSelectionPanel = selectionPanel;
-        coinResultPanel = resultPanel;
-        coinResultText = resultText;
-        BindButtons();
     }
 
     private void BindButtons()

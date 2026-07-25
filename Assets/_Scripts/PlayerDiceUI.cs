@@ -25,24 +25,16 @@ public class PlayerDiceUI : MonoBehaviour
         {
             player = FindAnyObjectByType<Player>();
         }
-    }
 
-    private void Start()
-    {
-        if (player != null) player.onDiceRolled += RefreshDiceUI;
+        if (player != null)
+        {
+            player.onDiceRolled += RefreshDiceUI;
+        } 
     }
 
     private void OnDestroy()
     {
         if (player != null) player.onDiceRolled -= RefreshDiceUI;
-    }
-
-    public void Configure(Player assignedPlayer, PlayerDiceDrag firstDice, PlayerDiceDrag secondDice, PlayerDiceDrag thirdDice)
-    {
-        player = assignedPlayer;
-        diceOne = firstDice;
-        diceTwo = secondDice;
-        diceThree = thirdDice;
     }
 
     public void RefreshDiceUI()

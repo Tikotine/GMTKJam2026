@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,31 +10,31 @@ public class CombatUI : MonoBehaviour
     [SerializeField] private Enemy enemy;
 
     [Header("Turn UI")]
-    [SerializeField] private Text turnText;
-    [SerializeField] private Text attackerText;
-    [SerializeField] private Text phaseText;
-    [SerializeField] private Text suddenDeathText;
+    [SerializeField] private TMP_Text turnText;
+    [SerializeField] private TMP_Text attackerText;
+    [SerializeField] private TMP_Text phaseText;
+    [SerializeField] private TMP_Text suddenDeathText;
 
     [Header("Health UI")]
-    [SerializeField] private Text playerHealthText;
-    [SerializeField] private Text enemyHealthText;
+    [SerializeField] private TMP_Text playerHealthText;
+    [SerializeField] private TMP_Text enemyHealthText;
 
     [Header("Combat Stats UI")]
-    [SerializeField] private Text playerAttackCountText;
-    [SerializeField] private Text playerTempoText;
-    [SerializeField] private Text playerBreakDurationText;
-    [SerializeField] private Text enemyAttackCountText;
-    [SerializeField] private Text enemyTempoText;
-    [SerializeField] private Text enemyBreakDurationText;
+    [SerializeField] private TMP_Text playerAttackCountText;
+    [SerializeField] private TMP_Text playerTempoText;
+    [SerializeField] private TMP_Text playerBreakDurationText;
+    [SerializeField] private TMP_Text enemyAttackCountText;
+    [SerializeField] private TMP_Text enemyTempoText;
+    [SerializeField] private TMP_Text enemyBreakDurationText;
 
     [Header("Global Modifier UI")]
-    [SerializeField] private Text globalAttackCountModifierText;
-    [SerializeField] private Text globalTempoModifierText;
-    [SerializeField] private Text globalBreakDurationModifierText;
+    [SerializeField] private TMP_Text globalAttackCountModifierText;
+    [SerializeField] private TMP_Text globalTempoModifierText;
+    [SerializeField] private TMP_Text globalBreakDurationModifierText;
 
     [Header("Game Over UI")]
     [SerializeField] private GameObject gameOverPanel;
-    [SerializeField] private Text gameOverText;
+    [SerializeField] private TMP_Text gameOverText;
 
     private void Awake()
     {
