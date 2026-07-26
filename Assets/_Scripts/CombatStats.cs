@@ -5,7 +5,7 @@ public class CombatStats
 {
     [Header("Base Values")]
     public int baseAttackCount;
-    public float baseTempo = 1f;
+    public float baseTempo = 5f;
     public float baseBreakDuration = 4f;
 
     [Header("Global Modifiers")]
@@ -72,7 +72,10 @@ public class CombatStats
         // Base Tempo x (Final Dice Tempo Value x 0.1)
         // + Cumulative Global Tempo Modifier
 
-        float finalTempo = baseTempo * (tempoDiceModifier * 0.1f) + globalTempoModifier;
+        float diceTempoMultiplier = 1f + ((tempoDiceModifier - 3.5f) * 0.6f);
+        float finalTempo = baseTempo * diceTempoMultiplier + globalTempoModifier;
+
+        //float finalTempo = baseTempo * (tempoDiceModifier * 0.1f) + globalTempoModifier;
 
         return finalTempo;
     }
@@ -104,6 +107,6 @@ public class CombatStats
         // Tempo must always be positive.
         tempo = Mathf.Max(0.1f, tempo);
 
-        breakDuration = Mathf.Max(0f, breakDuration);
+        breakDuration = Mathf.Max(0.5f, breakDuration);
     }
 }

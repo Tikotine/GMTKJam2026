@@ -345,14 +345,14 @@ public class GameManager : MonoBehaviour
         // - Defend QTEs
         if (playerIsAttacking)
         {
-            currentCombatTempo = playerStats.tempo;
+            currentCombatTempo = playerStats.tempo - enemyStats.tempo;
         }
         else
         {
-            currentCombatTempo = enemyStats.tempo;
+            currentCombatTempo = enemyStats.tempo - playerStats.tempo;
         }
 
-        currentCombatTempo = Mathf.Max(0.1f, currentCombatTempo);
+        currentCombatTempo = Mathf.Max(0.5f, currentCombatTempo);
 
         Debug.Log("Player Stats: Attack Count = " + playerStats.attackCount + ", Tempo = " + playerStats.tempo + ", Break Duration = " + playerStats.breakDuration);
         Debug.Log("Enemy Stats: Attack Count = " + enemyStats.attackCount + ", Tempo = " + enemyStats.tempo + ", Break Duration = " + enemyStats.breakDuration);
