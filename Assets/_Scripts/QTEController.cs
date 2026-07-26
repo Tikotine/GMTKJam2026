@@ -107,7 +107,6 @@ public class QTEController : MonoBehaviour
 
         if (qteFinished)
         {
-            StartCoroutine(ShakeCameraShorter());
             yield break;
         }
 
@@ -115,7 +114,6 @@ public class QTEController : MonoBehaviour
 
         if (qteFinished)
         {
-            StartCoroutine(ShakeCameraShorter());
             yield break;
         }
 
@@ -123,7 +121,6 @@ public class QTEController : MonoBehaviour
 
         if (qteFinished)
         {
-            StartCoroutine(ShakeCameraShorter());
             yield break;
         }
 
@@ -131,7 +128,6 @@ public class QTEController : MonoBehaviour
 
         if (qteFinished)
         {
-            StartCoroutine(ShakeCameraShorter());
             yield break;
         }
 
