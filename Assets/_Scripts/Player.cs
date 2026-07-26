@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -31,6 +32,11 @@ public class Player : MonoBehaviour
     private bool attackCountAssigned;
     private bool tempoAssigned;
     private bool breakDurationAssigned;
+
+    [Header("VFX")]
+    [SerializeField] private CanvasGroup flashCanvas;
+    [SerializeField] private float flashDuration = 0.15f;
+    [SerializeField] private GameObject enemyHitFlash;
 
     private void Update()
     {
@@ -208,6 +214,7 @@ public class Player : MonoBehaviour
 
         health -= damage;
         health = Mathf.Max(health, 0);
+        FlashVignette();
 
         Debug.Log("Player Taking " + damage + " damage");
         Debug.Log("Player HP: " + health);
@@ -242,5 +249,36 @@ public class Player : MonoBehaviour
     public float GetRemainingParryCooldown()
     {
         return Mathf.Max(currentParryCooldown, 0f);
+    }
+
+    public void FlashVignette()
+    {
+        StartCoroutine(Flash());
+    }
+
+    private IEnumerator Flash()
+    {
+        yield return new WaitForSeconds(0.2f);
+
+        float elapsedTime = 0f;
+
+        HitFlash();
+
+        while (elapsedTime < flashDuration)
+        { 
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / flashDuration;
+
+            flashCanvas.alpha = EasingFunction.EaseOutQuint(1, 0, t);
+
+            yield return null;
+        }   
+
+        yield break;
+    }
+
+    public void HitFlash()
+    { 
+        Instantiate(enemyHitFlash, transform.position, Quaternion.identity);
     }
 }

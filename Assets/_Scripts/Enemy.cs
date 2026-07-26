@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class Enemy : MonoBehaviour
 {
@@ -37,6 +38,10 @@ public class Enemy : MonoBehaviour
     private int diceValueThree;
 
     private EnemyModifierAssignment modifierAssignment;
+
+    [Header("VFX")]
+    [SerializeField] private float flashDuration = 0.15f;
+    [SerializeField] private GameObject playerHitFlash;
 
     private void Awake()
     {
@@ -189,6 +194,8 @@ public class Enemy : MonoBehaviour
         Debug.Log("Enemy Taking " + damage + " damage");
         Debug.Log("Enemy HP: " + currentHealth);
 
+        StartCoroutine(Flash());
+
         if (currentHealth <= 0)
         {
             Die();
@@ -210,6 +217,20 @@ public class Enemy : MonoBehaviour
     {
         Debug.Log("Enemy Died");
     }
+
+    private IEnumerator Flash()
+    {
+        yield return new WaitForSeconds(0.2f);
+
+        HitFlash();
+
+        yield break;
+    }
+
+    public void HitFlash()
+    {
+        Instantiate(playerHitFlash, transform.position, Quaternion.identity);
+    }
 }
 
 [System.Serializable]
@@ -219,3 +240,4 @@ public class EnemyModifierAssignment
     public float tempoModifier;
     public float breakDurationModifier;
 }
+

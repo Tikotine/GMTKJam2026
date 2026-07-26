@@ -37,6 +37,10 @@ public class QTEManager : MonoBehaviour
     private AttackOrbController playerOrbs;
     private AttackOrbController enemyOrbs;
 
+    [Header("Animations")]
+    [SerializeField] private CombatAnimationController playerAnimationCotnroller;
+    [SerializeField] private CombatAnimationController enemyAnimationCotnroller;
+
     private void Awake()
     {
         playerScript = FindAnyObjectByType<Player>();
@@ -44,6 +48,9 @@ public class QTEManager : MonoBehaviour
 
         playerOrbs = playerScript.GetComponentInChildren<AttackOrbController>();
         enemyOrbs = enemyScript.GetComponentInChildren<AttackOrbController>();
+
+        playerAnimationCotnroller = playerScript.gameObject.GetComponent<CombatAnimationController>();
+        enemyAnimationCotnroller = enemyScript.gameObject.GetComponent<CombatAnimationController>();
     }
 
     public void StartCombatSequence(bool playerIsAttacking, int attackerAttackCount, float combatTempo, float attackerBreakDuration)
@@ -109,11 +116,13 @@ public class QTEManager : MonoBehaviour
             {
                 case QTEController.QTEResult.SUCCESS:
                     successfulAttacks++;
+                    GetAttackerAnimationController(playerIsAttacking).PlayCast();
                     attackerOrbs.AddOrb(false);
                     break;
 
                 case QTEController.QTEResult.PERFECT:
                     perfectAttacks++;
+                    GetAttackerAnimationController(playerIsAttacking).PlayCast();
                     attackerOrbs.AddOrb(true);
                     break;
 
@@ -179,14 +188,17 @@ public class QTEManager : MonoBehaviour
             switch (defendResult)
             {
                 case QTEController.QTEResult.SUCCESS:
+                    GetDefenderAnimationController(playerIsAttacking).PlayParry();
                     successfulDefends++;
                     break;
 
                 case QTEController.QTEResult.PERFECT:
+                    GetDefenderAnimationController(playerIsAttacking).PlayParry();
                     perfectDefends++;
                     break;
 
                 case QTEController.QTEResult.MISS:
+                    GetDefenderAnimationController(playerIsAttacking).PlayFlinch();
                     break;
             }
 
@@ -366,5 +378,15 @@ public class QTEManager : MonoBehaviour
             this.perfectDefends = perfectDefends;
             this.totalDamage = totalDamage;
         }
+    }
+
+    private CombatAnimationController GetAttackerAnimationController(bool playerIsAttacking)
+    { 
+        return playerIsAttacking ? playerAnimationCotnroller : enemyAnimationCotnroller;
+    }
+
+    private CombatAnimationController GetDefenderAnimationController(bool playerIsAttacking)
+    {
+        return playerIsAttacking ? enemyAnimationCotnroller : playerAnimationCotnroller;
     }
 }

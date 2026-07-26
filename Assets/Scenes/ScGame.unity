@@ -727,7 +727,7 @@ MonoBehaviour:
   orbAnchor: {fileID: 141642869}
   successOrbPrefab: {fileID: 6023202325112447169, guid: 1962b789f99e40b44b65871abb0fd81b, type: 3}
   perfectOrbPrefab: {fileID: 241904576640127611, guid: cfece6a07fb1a484d93a69cfc36a9952, type: 3}
-  radius: 1.2
+  radius: 1.5
   arcDegrees: 120
   orbMoveDuration: 0.2
   cameraToShake: {fileID: 2050292190}
@@ -967,6 +967,7 @@ RectTransform:
   - {fileID: 373855283}
   - {fileID: 1335448677}
   - {fileID: 542679671}
+  - {fileID: 1312108077}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1990,8 +1991,8 @@ Transform:
   m_GameObject: {fileID: 624353166}
   serializedVersion: 2
   m_LocalRotation: {x: 0.17364821, y: -0, z: -0, w: 0.9848078}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0.2, z: 0}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1274697505}
@@ -2429,6 +2430,8 @@ GameObject:
   - component: {fileID: 1018765609}
   - component: {fileID: 1018765610}
   - component: {fileID: 1018765611}
+  - component: {fileID: 1018765612}
+  - component: {fileID: 1018765613}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2474,6 +2477,9 @@ MonoBehaviour:
   health: 100
   parryCooldown: 0.5
   playerActions: 1
+  flashCanvas: {fileID: 1312108074}
+  flashDuration: 0.5
+  enemyHitFlash: {fileID: 8107375107907926394, guid: 022561f49a9e8da41b9cf78a801ca27a, type: 3}
 --- !u!114 &1018765611
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2520,6 +2526,41 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!95 &1018765612
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1018765608}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: cad579fa9df17d5468ffce073c12a500, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1018765613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1018765608}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f2141d7fbbf41d4b8aa7d09d54309d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatAnimationController
+  animator: {fileID: 0}
 --- !u!1 &1094596253
 GameObject:
   m_ObjectHideFlags: 0
@@ -2746,6 +2787,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1274697505}
   - component: {fileID: 1274697504}
+  - component: {fileID: 1274697506}
+  - component: {fileID: 1274697507}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -2777,6 +2820,8 @@ MonoBehaviour:
   diceSlotOne: {fileID: 11400000, guid: 4378fc0b7d8c2294d9880f312e38eea0, type: 2}
   diceSlotTwo: {fileID: 11400000, guid: 841cde73bb62f1c4bbc0297f94690289, type: 2}
   diceSlotThree: {fileID: 11400000, guid: 5de881880f95ed54cb8b7d3bde3ab96a, type: 2}
+  flashDuration: 0.15
+  playerHitFlash: {fileID: 6809813360563060846, guid: 929f56f1081e42c428715114a375fefd, type: 3}
 --- !u!4 &1274697505
 Transform:
   m_ObjectHideFlags: 0
@@ -2794,6 +2839,41 @@ Transform:
   - {fileID: 1614579159}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &1274697506
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1274697503}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: b3fb8e833b46c6440a88d77706a9fb06, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1274697507
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1274697503}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f2141d7fbbf41d4b8aa7d09d54309d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatAnimationController
+  animator: {fileID: 0}
 --- !u!1 &1295585203
 GameObject:
   m_ObjectHideFlags: 0
@@ -2963,6 +3043,94 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1296537048}
   m_CullTransparentMesh: 1
+--- !u!1 &1312108073
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1312108077}
+  - component: {fileID: 1312108076}
+  - component: {fileID: 1312108075}
+  - component: {fileID: 1312108074}
+  m_Layer: 0
+  m_Name: Vignette
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!225 &1312108074
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1312108073}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
+--- !u!114 &1312108075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1312108073}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 176a46ec163946f48bff88498e193c45, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1312108076
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1312108073}
+  m_CullTransparentMesh: 1
+--- !u!224 &1312108077
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1312108073}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 325272520}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1321355107
 GameObject:
   m_ObjectHideFlags: 0
@@ -3783,7 +3951,7 @@ MonoBehaviour:
   orbAnchor: {fileID: 1614579159}
   successOrbPrefab: {fileID: 6023202325112447169, guid: 1962b789f99e40b44b65871abb0fd81b, type: 3}
   perfectOrbPrefab: {fileID: 241904576640127611, guid: cfece6a07fb1a484d93a69cfc36a9952, type: 3}
-  radius: 1.2
+  radius: 1.5
   arcDegrees: 120
   orbMoveDuration: 0.2
   cameraToShake: {fileID: 1725653323}
@@ -4409,6 +4577,8 @@ MonoBehaviour:
   playerDefenderTarget: {fileID: 1018765609}
   enemyDefenderTarget: {fileID: 1274697505}
   counter: {fileID: 1592899594}
+  playerAnimationCotnroller: {fileID: 1018765613}
+  enemyAnimationCotnroller: {fileID: 1274697507}
 --- !u!4 &1874620906
 Transform:
   m_ObjectHideFlags: 0
@@ -4526,8 +4696,8 @@ Transform:
   m_GameObject: {fileID: 1894376629}
   serializedVersion: 2
   m_LocalRotation: {x: 0.17364821, y: -0, z: -0, w: 0.9848078}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0.2, z: 0}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1018765609}
