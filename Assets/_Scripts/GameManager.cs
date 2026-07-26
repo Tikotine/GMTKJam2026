@@ -50,6 +50,8 @@ public class GameManager : MonoBehaviour
     private float globalTempoModifier;
     private float globalBreakDurationModifier;
 
+    private float currentCombatTempo;
+
     private void Awake()
     {
         if (playerScript == null)
@@ -296,8 +298,8 @@ public class GameManager : MonoBehaviour
 
             case 1:
                 float tempoChange = positiveModifier ? modifierAmount : -modifierAmount;
-                globalTempoModifier += tempoChange;
-                Debug.Log("GLOBAL MODIFIER: Tempo " + FormatModifier(tempoChange));
+                globalTempoModifier = Mathf.Max(0f,globalTempoModifier + tempoChange);
+                Debug.Log("GLOBAL MODIFIER: Tempo Change " + FormatModifier(tempoChange) + " | Cumulative Tempo Modifier: " + globalTempoModifier);
                 break;
 
             case 2:
@@ -320,19 +322,30 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("========== CALCULATING COMBAT STATS ==========");
 
+        // Calculate individual stats.
+        playerStats.CalculateAttackerStats();
+        enemyStats.CalculateDefenderStats();
+
+        // The attacking side determines the tempo for the entire turn.
+        // This same tempo is used during:
+        // - Attack break timers
+        // - Attack QTEs
+        // - Defender cooldowns
+        // - Defend QTEs
         if (playerIsAttacking)
         {
-            playerStats.CalculateAttackerStats(enemyStats);
-            enemyStats.CalculateDefenderStats(playerStats);
+            currentCombatTempo = playerStats.tempo;
         }
         else
         {
-            enemyStats.CalculateAttackerStats(playerStats);
-            playerStats.CalculateDefenderStats(enemyStats);
+            currentCombatTempo = enemyStats.tempo;
         }
+
+        currentCombatTempo = Mathf.Max(0.1f, currentCombatTempo);
 
         Debug.Log("Player Stats: Attack Count = " + playerStats.attackCount + ", Tempo = " + playerStats.tempo + ", Break Duration = " + playerStats.breakDuration);
         Debug.Log("Enemy Stats: Attack Count = " + enemyStats.attackCount + ", Tempo = " + enemyStats.tempo + ", Break Duration = " + enemyStats.breakDuration);
+        Debug.Log("SHARED COMBAT TEMPO: " + currentCombatTempo);
     }
 
     private void StartCombatSequence()
@@ -351,32 +364,25 @@ public class GameManager : MonoBehaviour
         waitingForCombatSequence = true;
 
         int attackerAttackCount;
-        float attackerTempo;
         float attackerBreakDuration;
-        float defenderTempo;
-        float defenderBreakDuration;
 
         if (playerIsAttacking)
         {
             attackerAttackCount = playerStats.attackCount;
-            attackerTempo = playerStats.tempo;
             attackerBreakDuration = playerStats.breakDuration;
-            defenderTempo = enemyStats.tempo;
-            defenderBreakDuration = enemyStats.breakDuration;
         }
         else
         {
             attackerAttackCount = enemyStats.attackCount;
-            attackerTempo = enemyStats.tempo;
             attackerBreakDuration = enemyStats.breakDuration;
-            defenderTempo = playerStats.tempo;
-            defenderBreakDuration = playerStats.breakDuration;
         }
 
         Debug.Log("========== COMBAT SEQUENCE START ==========");
         Debug.Log("Attacker: " + (playerIsAttacking ? "PLAYER" : "ENEMY"));
 
-        qteManager.StartCombatSequence(playerIsAttacking, attackerAttackCount, attackerTempo, attackerBreakDuration, defenderTempo, defenderBreakDuration);
+        Debug.Log("Shared Combat Tempo: " + currentCombatTempo);
+
+        qteManager.StartCombatSequence(playerIsAttacking, attackerAttackCount, currentCombatTempo, attackerBreakDuration);
     }
 
     private void OnCombatSequenceFinished(QTEManager.SequenceResult result)

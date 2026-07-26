@@ -6,7 +6,6 @@ public class QTEVisual : MonoBehaviour
     [SerializeField] private Transform shrinkingRing;
     [SerializeField] private Transform windowBackground;
 
-    [Header("Window Display")]
     private float backgroundScale;
 
     private float totalDuration;
@@ -16,28 +15,27 @@ public class QTEVisual : MonoBehaviour
 
     public void Initialise(float totalDuration, float perfectDuration)
     {
-        this.totalDuration = totalDuration;
+        this.totalDuration = Mathf.Max(0.0001f, totalDuration);
 
         elapsed = 0f;
         running = true;
 
-        backgroundScale = perfectDuration / totalDuration;
-
+        backgroundScale = perfectDuration / this.totalDuration;
         shrinkingRing.localScale = Vector3.one;
         windowBackground.localScale = Vector3.one * backgroundScale;
     }
 
-    public void Tick(float deltaTime)
+    public void Tick(float scaledDeltaTime)
     {
         if (!running)
+        {
             return;
+        }
 
-        elapsed += deltaTime;
+        elapsed += scaledDeltaTime;
 
         float t = Mathf.Clamp01(elapsed / totalDuration);
-
         float scale = Mathf.Lerp(1f, 0f, t);
-
         shrinkingRing.localScale = Vector3.one * scale;
     }
 

@@ -33,31 +33,48 @@ public class CombatStats
     public void SetGlobalModifiers(int attackCountModifier, float tempoModifier, float breakDurationModifier)
     {
         globalAttackCountModifier = attackCountModifier;
-        globalTempoModifier = tempoModifier;
+
+        // Global tempo modifier can never be negative.
+        globalTempoModifier = Mathf.Max(0f, tempoModifier);
+
         globalBreakDurationModifier = breakDurationModifier;
     }
 
-    public void SetDiceModifiers(int attackCountModifier, float tempoModifier, float breakDurationModifier)
+    public void SetDiceModifiers(int attackCountModifier,float tempoModifier,float breakDurationModifier)
     {
         attackCountDiceModifier = attackCountModifier;
         tempoDiceModifier = tempoModifier;
         breakDurationDiceModifier = breakDurationModifier;
     }
 
-    public void CalculateAttackerStats(CombatStats defender)
+    public void CalculateAttackerStats()
     {
-        attackCount = baseAttackCount + globalAttackCountModifier + attackCountDiceModifier - defender.attackCountDiceModifier;
-        tempo = baseTempo + globalTempoModifier + tempoDiceModifier - defender.tempoDiceModifier;
-        breakDuration = baseBreakDuration + globalBreakDurationModifier - breakDurationDiceModifier + defender.breakDurationDiceModifier;
+        attackCount = baseAttackCount + globalAttackCountModifier + attackCountDiceModifier;
+        tempo = CalculateTempo();
+        breakDuration = baseBreakDuration + globalBreakDurationModifier - breakDurationDiceModifier;
+
         ClampStats();
     }
 
-    public void CalculateDefenderStats(CombatStats attacker)
+    public void CalculateDefenderStats()
     {
-        attackCount = baseAttackCount + globalAttackCountModifier + attackCountDiceModifier - attacker.attackCountDiceModifier;
-        tempo = baseTempo + globalTempoModifier + tempoDiceModifier - attacker.tempoDiceModifier;
-        breakDuration = baseBreakDuration + globalBreakDurationModifier - breakDurationDiceModifier + attacker.breakDurationDiceModifier;
+        attackCount = baseAttackCount + globalAttackCountModifier + attackCountDiceModifier;
+        tempo = CalculateTempo();
+        breakDuration = baseBreakDuration + globalBreakDurationModifier - breakDurationDiceModifier;
+
         ClampStats();
+    }
+
+    private float CalculateTempo()
+    {
+        // Formula:
+        // Final Tempo =
+        // Base Tempo x (Final Dice Tempo Value x 0.1)
+        // + Cumulative Global Tempo Modifier
+
+        float finalTempo = baseTempo * (tempoDiceModifier * 0.1f) + globalTempoModifier;
+
+        return finalTempo;
     }
 
     public void ResetDiceModifiers()
@@ -83,7 +100,10 @@ public class CombatStats
     private void ClampStats()
     {
         attackCount = Mathf.Max(1, attackCount);
+
+        // Tempo must always be positive.
         tempo = Mathf.Max(0.1f, tempo);
+
         breakDuration = Mathf.Max(0f, breakDuration);
     }
 }

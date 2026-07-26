@@ -41,7 +41,7 @@ public class QTEManager : MonoBehaviour
         enemyOrbs = enemyScript.GetComponentInChildren<AttackOrbController>();
     }
 
-    public void StartCombatSequence(bool playerIsAttacking, int attackerAttackCount, float attackerTempo, float attackerBreakDuration, float defenderTempo, float defenderBreakDuration)
+    public void StartCombatSequence(bool playerIsAttacking, int attackerAttackCount, float combatTempo, float attackerBreakDuration)
     {
         if (combatInProgress)
         {
@@ -49,10 +49,10 @@ public class QTEManager : MonoBehaviour
             return;
         }
 
-        StartCoroutine(CombatSequence(playerIsAttacking, attackerAttackCount, attackerTempo, attackerBreakDuration, defenderTempo, defenderBreakDuration));
+        StartCoroutine(CombatSequence(playerIsAttacking, attackerAttackCount, combatTempo, attackerBreakDuration));
     }
 
-    private IEnumerator CombatSequence(bool playerIsAttacking, int attackerAttackCount, float attackerTempo, float attackerBreakDuration, float defenderTempo, float defenderBreakDuration)
+    private IEnumerator CombatSequence(bool playerIsAttacking, int attackerAttackCount, float combatTempo, float attackerBreakDuration)
     {
         AttackOrbController attackerOrbs = playerIsAttacking ? playerOrbs : enemyOrbs;
         Debug.Log($"Attacker is {(playerIsAttacking ? "Player" : "Enemy")}");
@@ -81,13 +81,13 @@ public class QTEManager : MonoBehaviour
 
         for (int i = 0; i < attackerAttackCount; i++)
         {
-            yield return BreakTimer(attackerBreakDuration, attackerTempo);
+            yield return BreakTimer(attackerBreakDuration, combatTempo);
 
             QTEController.QTEResult attackResult = QTEController.QTEResult.MISS;
 
             if (playerIsAttacking)
             {
-                yield return StartPlayerQTE(attackerTempo, result => attackResult = result);
+                yield return StartPlayerQTE(combatTempo, result => attackResult = result);
             }
             else
             {
@@ -143,7 +143,7 @@ public class QTEManager : MonoBehaviour
             
             if (i > 0)
             {
-                yield return DefenderCooldown(defenderParryCooldown, defenderTempo);
+                yield return DefenderCooldown(defenderParryCooldown, combatTempo);
             }
 
             QTEController.QTEResult defendResult = QTEController.QTEResult.MISS;
@@ -154,7 +154,7 @@ public class QTEManager : MonoBehaviour
             }
             else
             {
-                yield return StartPlayerQTE(defenderTempo, result => defendResult = result);
+                yield return StartPlayerQTE(combatTempo, result => defendResult = result);
             }
 
             Debug.Log("Defend " + (i + 1) + " Result: " + defendResult);
@@ -222,14 +222,13 @@ public class QTEManager : MonoBehaviour
 
     private IEnumerator BreakTimer(float breakDuration, float tempo)
     {
+        tempo = Mathf.Max(0.1f, tempo);
         float timer = breakDuration;
 
         while (timer > 0f)
         {
             timer -= Time.deltaTime * tempo;
-            // Prevent the displayed value from going below 0
             float displayTime = Mathf.Max(timer, 0f);
-            // Update the UI counter
             counter.text = displayTime.ToString("F2");
 
             yield return null;
@@ -240,11 +239,13 @@ public class QTEManager : MonoBehaviour
 
     private IEnumerator DefenderCooldown(float cooldownDuration, float tempo)
     {
+        tempo = Mathf.Max(0.1f, tempo);
         float timer = cooldownDuration;
 
         while (timer > 0f)
         {
             timer -= Time.deltaTime * tempo;
+
             yield return null;
         }
     }
@@ -252,18 +253,18 @@ public class QTEManager : MonoBehaviour
     private IEnumerator StartPlayerQTE(float tempo, Action<QTEController.QTEResult> callback)
     {
         QTEController currentQTE = Instantiate(qtePrefab);
-
         bool qteFinished = false;
 
         currentQTE.OnQTEFinished += () =>
         {
             callback(currentQTE.qteResult);
+
             Debug.Log("Manager Received " + currentQTE.qteResult);
+
             qteFinished = true;
         };
 
         currentQTE.StartQTE(tempo);
-
         yield return new WaitUntil(() => qteFinished);
 
         Destroy(currentQTE.gameObject);

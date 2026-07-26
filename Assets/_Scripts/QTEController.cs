@@ -32,13 +32,13 @@ public class QTEController : MonoBehaviour
     private bool qteActive;
     private bool inputReceived;
     private bool qteFinished;
+
     private float tempo = 1f;
 
     private Player playerScript;
+    private QTEVisual visual;
 
     public QTEResult qteResult { get; private set; }
-
-    private QTEVisual visual;
 
     private void Awake()
     {
@@ -79,11 +79,11 @@ public class QTEController : MonoBehaviour
             return;
         }
 
+        // Tempo is a speed multiplier.
         tempo = Mathf.Max(0.1f, qteTempo);
 
-        float totalDuration =(earlyMissWindow + earlySuccessWindow +perfectWindow + lateSuccessWindow + lateMissWindow) / tempo;
-
-        visual.Initialise(totalDuration, perfectWindow / tempo);
+        float totalDuration = earlyMissWindow + earlySuccessWindow + perfectWindow + lateSuccessWindow + lateMissWindow;
+        visual.Initialise(totalDuration, perfectWindow);
 
         StartCoroutine(QTESequence());
     }
@@ -131,12 +131,13 @@ public class QTEController : MonoBehaviour
         }
 
         qteResult = QTEResult.MISS;
+
         FinishQTE();
     }
 
     private IEnumerator WaitForWindow(float duration, QTEResult result)
     {
-        float timer = duration / tempo;
+        float timer = duration;
 
         while (timer > 0f)
         {
@@ -144,14 +145,19 @@ public class QTEController : MonoBehaviour
             {
                 qteResult = result;
                 FinishQTE();
+
                 yield break;
             }
 
             float delta = Time.deltaTime;
 
-            timer -= delta;
+            // Tempo is applied exactly once.
+            float scaledDelta = delta * tempo;
 
-            visual.Tick(delta);
+            timer -= scaledDelta;
+
+            // The visual uses the exact same scaled time.
+            visual.Tick(scaledDelta);
 
             yield return null;
         }
@@ -167,7 +173,7 @@ public class QTEController : MonoBehaviour
         qteActive = false;
         qteFinished = true;
 
-        Debug.Log("QTE Result: " + qteResult);
+        Debug.Log("QTE Result: " + qteResult + " | Tempo: " + tempo);
 
         visual.Stop();
         OnQTEFinished?.Invoke();
