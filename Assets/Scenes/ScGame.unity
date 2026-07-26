@@ -4141,6 +4141,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::QTEManager
   qtePrefab: {fileID: 6499218180965912028, guid: 9e013d89953779c448acb73d3b81d74b, type: 3}
+  qteSpawnLocation: {x: 0, y: 0.75, z: 2.5}
   reducedDamage: 10
   successDamage: 15
   perfectDamage: 20

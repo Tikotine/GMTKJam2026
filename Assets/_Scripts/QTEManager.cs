@@ -8,6 +8,7 @@ public class QTEManager : MonoBehaviour
 {
     [Header("QTE")]
     [SerializeField] private QTEController qtePrefab;
+    [SerializeField] private Vector3 qteSpawnLocation;
 
     [Header("Damage")]
     [SerializeField] private int reducedDamage = 5;
@@ -252,7 +253,7 @@ public class QTEManager : MonoBehaviour
 
     private IEnumerator StartPlayerQTE(float tempo, Action<QTEController.QTEResult> callback)
     {
-        QTEController currentQTE = Instantiate(qtePrefab);
+        QTEController currentQTE = Instantiate(qtePrefab, qteSpawnLocation, Quaternion.identity);
         bool qteFinished = false;
 
         currentQTE.OnQTEFinished += () =>
