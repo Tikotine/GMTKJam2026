@@ -52,6 +52,9 @@ public class GameManager : MonoBehaviour
 
     private float currentCombatTempo;
 
+    [Header("Camera")]
+    [SerializeField] private CombatCameraManager cameraManager;
+
     private void Awake()
     {
         if (playerScript == null)
@@ -72,6 +75,11 @@ public class GameManager : MonoBehaviour
         if (coinTossUI == null)
         {
             coinTossUI = FindAnyObjectByType<CoinTossUI>();
+        }
+
+        if (cameraManager == null)
+        {
+            cameraManager = FindAnyObjectByType<CombatCameraManager>();
         }
 
         playerStats = new CombatStats();
@@ -231,6 +239,9 @@ public class GameManager : MonoBehaviour
         Debug.Log("STARTING TURN " + currentTurn);
         Debug.Log("================================");
 
+        // Camera 1: Player chooses dice assignments.
+        cameraManager.SetDiceAssignmentCamera();
+
         yield return ModifierAssignmentPhase();
 
         CalculateCombatStats();
@@ -382,6 +393,8 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("Shared Combat Tempo: " + currentCombatTempo);
 
+        // Switch camera based on who is attacking.
+        cameraManager.SetCombatCameraBasedOnAttacker();
         qteManager.StartCombatSequence(playerIsAttacking, attackerAttackCount, currentCombatTempo, attackerBreakDuration);
     }
 
