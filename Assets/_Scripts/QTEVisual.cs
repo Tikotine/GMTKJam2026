@@ -20,9 +20,9 @@ public class QTEVisual : MonoBehaviour
         elapsed = 0f;
         running = true;
 
-        backgroundScale = perfectDuration / this.totalDuration;
+        //backgroundScale = perfectDuration / this.totalDuration;
         shrinkingRing.localScale = Vector3.one;
-        windowBackground.localScale = Vector3.one * backgroundScale;
+        //windowBackground.localScale = Vector3.one * backgroundScale;
     }
 
     public void Tick(float scaledDeltaTime)
