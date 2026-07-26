@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{1917a762-fb74-4d95-837d-9c10c8632928}">
+		<property name="assetPath">
+			<value>SFX/AttackFail.mp3</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>24</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>7.056</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{caf376be-d1d7-48db-9134-ca637c8bd750}</destination>
+		</relationship>
+	</object>
+</objects>
