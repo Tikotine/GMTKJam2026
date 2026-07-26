@@ -1,3 +1,4 @@
+using CameraShake;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -106,6 +107,7 @@ public class QTEController : MonoBehaviour
 
         if (qteFinished)
         {
+            StartCoroutine(ShakeCameraShorter());
             yield break;
         }
 
@@ -113,6 +115,7 @@ public class QTEController : MonoBehaviour
 
         if (qteFinished)
         {
+            StartCoroutine(ShakeCameraShorter());
             yield break;
         }
 
@@ -120,6 +123,7 @@ public class QTEController : MonoBehaviour
 
         if (qteFinished)
         {
+            StartCoroutine(ShakeCameraShorter());
             yield break;
         }
 
@@ -127,6 +131,7 @@ public class QTEController : MonoBehaviour
 
         if (qteFinished)
         {
+            StartCoroutine(ShakeCameraShorter());
             yield break;
         }
 
@@ -188,4 +193,5 @@ public class QTEController : MonoBehaviour
     {
         return qteFinished;
     }
+
 }

@@ -1,3 +1,4 @@
+using CameraShake;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,6 +18,10 @@ public class AttackOrbController : MonoBehaviour
     [Tooltip("How long it takes for an orb to move toward the defender.")]
     [SerializeField] private float orbMoveDuration = 0.5f;
 
+    [Header("Camera")]
+    [SerializeField] private GameObject cameraToShake;
+    [SerializeField] private float cameraShakeDuration = 0.3f;
+
     private readonly List<GameObject> activeOrbs = new();
 
     public void AddOrb(bool perfect)
@@ -26,6 +31,7 @@ public class AttackOrbController : MonoBehaviour
         GameObject orb = Instantiate(prefab, orbAnchor);
 
         activeOrbs.Add(orb);
+        StartCoroutine(ShakeCameraShort());
 
         ArrangeOrbs();
     }
@@ -84,6 +90,9 @@ public class AttackOrbController : MonoBehaviour
         }
 
         orbTransform.position = targetPosition;
+
+        StartCoroutine(ShakeCameraExplosion());
+
         Destroy(orb);
         activeOrbs.RemoveAt(0);
 
@@ -129,6 +138,44 @@ public class AttackOrbController : MonoBehaviour
             {
                 attackOrb.SetTarget(pos);
             }
+        }
+    }
+
+    private IEnumerator ShakeCameraShort()
+    {
+        CameraShaker shaker = cameraToShake.GetComponent<CameraShaker>();
+
+        if (shaker == null)
+        {
+            shaker = cameraToShake.AddComponent<CameraShaker>();
+        }
+
+        shaker.ShakePresets.ShortShake3D();
+
+        yield return new WaitForSeconds(cameraShakeDuration);
+
+        if (shaker != null)
+        {
+            Destroy(shaker);
+        }
+    }
+
+    private IEnumerator ShakeCameraExplosion()
+    {
+        CameraShaker shaker = cameraToShake.GetComponent<CameraShaker>();
+
+        if (shaker == null)
+        {
+            shaker = cameraToShake.AddComponent<CameraShaker>();
+        }
+
+        shaker.ShakePresets.Explosion3D();
+
+        yield return new WaitForSeconds(cameraShakeDuration);
+
+        if (shaker != null)
+        {
+            Destroy(shaker);
         }
     }
 }
