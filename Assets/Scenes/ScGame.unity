@@ -729,6 +729,7 @@ MonoBehaviour:
   perfectOrbPrefab: {fileID: 241904576640127611, guid: cfece6a07fb1a484d93a69cfc36a9952, type: 3}
   radius: 1.2
   arcDegrees: 120
+  orbMoveDuration: 0.2
 --- !u!1 &309039143
 GameObject:
   m_ObjectHideFlags: 0
@@ -3665,6 +3666,7 @@ MonoBehaviour:
   perfectOrbPrefab: {fileID: 241904576640127611, guid: cfece6a07fb1a484d93a69cfc36a9952, type: 3}
   radius: 1.2
   arcDegrees: 120
+  orbMoveDuration: 0.2
 --- !u!1 &1642255446
 GameObject:
   m_ObjectHideFlags: 0
@@ -4146,6 +4148,8 @@ MonoBehaviour:
   successDamage: 15
   perfectDamage: 20
   defenderParryCooldown: 0.5
+  playerDefenderTarget: {fileID: 1018765609}
+  enemyDefenderTarget: {fileID: 1274697505}
   counter: {fileID: 1592899594}
 --- !u!4 &1874620906
 Transform:

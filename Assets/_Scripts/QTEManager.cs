@@ -22,6 +22,10 @@ public class QTEManager : MonoBehaviour
     private Player playerScript;
     private Enemy enemyScript;
 
+    [Header("Defender Targets")]
+    [SerializeField] private Transform playerDefenderTarget;
+    [SerializeField] private Transform enemyDefenderTarget;
+
     [Header("Combat State")]
     private bool combatInProgress;
 
@@ -56,6 +60,8 @@ public class QTEManager : MonoBehaviour
     private IEnumerator CombatSequence(bool playerIsAttacking, int attackerAttackCount, float combatTempo, float attackerBreakDuration)
     {
         AttackOrbController attackerOrbs = playerIsAttacking ? playerOrbs : enemyOrbs;
+        Transform defenderTarget = playerIsAttacking ? enemyDefenderTarget : playerDefenderTarget;
+
         Debug.Log($"Attacker is {(playerIsAttacking ? "Player" : "Enemy")}");
         Debug.Log($"Orb controller = {attackerOrbs?.gameObject.name}");
         combatInProgress = true;
@@ -164,9 +170,11 @@ public class QTEManager : MonoBehaviour
             int damage = CalculateDamage(attackResult, defendResult);
 
             totalDamage += damage;
-
             ApplyDamage(playerIsAttacking, damage);
-            attackerOrbs.RemoveFirstOrb();
+
+            // Move the orb toward the defending character.
+            // The QTEManager has already determined who the defender is.
+            yield return StartCoroutine(attackerOrbs.RemoveFirstOrb(defenderTarget));
 
             switch (defendResult)
             {
